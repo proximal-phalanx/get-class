@@ -10,13 +10,13 @@ HITWH抢课。使用的是比较简单的模拟爬虫技术，速度比不上传
 3. 下载chrome driver并将其添加到环境变量，安装chrome浏览器。
 `
 下载链接:
-    chrome浏览器: https://www.google.cn/intl/zh-CN/chrome/\n
-    chromedriver(windows): https://chromedriver.storage.googleapis.com/index.html?path=105.0.5195.52/\n
+    chrome浏览器: https://www.google.cn/intl/zh-CN/chrome/
+    chromedriver(windows): https://chromedriver.storage.googleapis.com/index.html?path=105.0.5195.52/
     chromedriver(macOS apple silicon): https://chromedriver.storage.googleapis.com/105.0.5195.52/chromedriver_mac64_m1.zip
-    chromedriver(全部版本): https://chromedriver.storage.googleapis.com/index.html?path=105.0.5195.52/\n
-    环境变量配置:\n
-    windows: https://ceshiren.com/t/topic/21687\n
-    macOS: https://www.cnblogs.com/CMbenten/p/16550193.html\n
+    chromedriver(全部版本): https://chromedriver.storage.googleapis.com/index.html?path=105.0.5195.52/
+    环境变量配置:
+    windows: https://ceshiren.com/t/topic/21687
+    macOS: https://www.cnblogs.com/CMbenten/p/16550193.html
     linux: 同mac，但是真的有linux用户不会处理环境变量?
 `
 4. 运行get\_class.py脚本

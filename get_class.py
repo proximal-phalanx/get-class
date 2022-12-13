@@ -32,7 +32,6 @@ except:
 
 vpn = True if input("是否使用VPN(y/n): ") == 'y' else False
 
-
 if(not vpn):
     web.get('http://jwts.hitwh.edu.cn/loginNOCAS')
     print('使用过程中请勿以任何形式操作自动打开的窗口, 包括将鼠标移至网页中的任何内容上. ')
@@ -57,32 +56,59 @@ else:
     web.get('http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS')
     time.sleep(1)
 
-targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n")
-web.find_elements(By.CLASS_NAME, 'navi_title')[4].click()
-time.sleep(1)
+tabsCount = int(input('请在终端上输入tab数\n'))
 
-web.find_element(By.XPATH, '//*[@id="tabs_container"]/div/span[5]/p[' + targetClassType + ']').click()
-time.sleep(1)
-web.switch_to.frame(0)
-web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
-time.sleep(1)
-classNum = int(input('目标课序号\n'))
-page = int((classNum - classNum % 20) / 20 + 1)
-shiftPage = page != 1
-pageXPath = '/html/body/div[7]/div/div[7]/ul/li[' + str(int(page + 2)) + ']'
-classXPath = '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[1]/div'
-print("自动抢课已开始，如需停止，请关闭窗口，或者按下Ctrl+C")
+class TabConfig:
+
+    def __init__(self, shiftPage, classXPath, pageXPath, handle) -> None:
+        self.shiftPage = shiftPage
+        self.classXPath = classXPath
+        self.pageXPath = pageXPath
+        self.handle = handle
+
+tabConfigs = []
+
+for i in range(tabsCount):
+    web.execute_script('window.open("http://jwts.hitwh.edu.cn/loginNOCAS");' if not vpn else 'window.open("http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS");')
+    if i == 0:
+        web.close()
+    web.switch_to.window(web.window_handles[i])
+    time.sleep(1)
+    targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n")
+    web.find_elements(By.CLASS_NAME, 'navi_title')[4].click()
+    time.sleep(1)
+
+    web.find_element(By.XPATH, '//*[@id="tabs_container"]/div/span[5]/p[' + targetClassType + ']').click()
+    time.sleep(1)
+    web.switch_to.frame(0)
+    web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
+    time.sleep(1)
+    classNum = int(input('目标课序号\n'))
+    page = int((classNum - classNum % 20) / 20 + 1)
+    shiftPage = page != 1
+    pageXPath = '/html/body/div[7]/div/div[7]/ul/li[' + str(int(page + 2)) + ']'
+    classXPath = '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[1]/div'
+    tabConfigs.append(TabConfig(shiftPage, classXPath, pageXPath, web.window_handles[i]))
+
+print("自动抢课已开始，如需停止，请关闭窗口，或者杀死此进程")
 print("请在自行打开另一个窗口检查是否抢课成功")
 print("请勿在自动打开的窗口中进行任何操作")
 print("本程序不保证抢课成功，如需保证，请同时自行手动抢课")
+
+excepted = False
 while True:
     try:
-        web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
-        time.sleep(0.01)
-        if shiftPage:
-            web.find_element(By.XPATH, pageXPath).click()
-        web.find_element(By.XPATH, classXPath).click()
-        web.find_element(By.XPATH, classXPath).click() 
+        for each in tabConfigs:
+            web.switch_to.window(each.handle)
+            web.switch_to.frame(0)
+            web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
+            time.sleep(0.01)
+            if each.shiftPage:
+                web.find_element(By.XPATH, each.pageXPath).click()
+            web.find_element(By.XPATH, each.classXPath).click()
+            web.find_element(By.XPATH, each.classXPath).click()
+            web.find_element(By.XPATH, each.classXPath).click()
     except:
-        pass
-
+        if not excepted:
+            print("出错了，可能是网络问题，也可能是抢课成功了，或者是其他原因，但程序不会停止，继续抢课")
+            excepted = True

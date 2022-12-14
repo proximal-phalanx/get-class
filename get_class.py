@@ -60,21 +60,22 @@ tabsCount = int(input('请在终端上输入tab数\n'))
 
 class TabConfig:
 
-    def __init__(self, shiftPage, classXPath, pageXPath, handle) -> None:
+    def __init__(self, shiftPage, classXPath, page, handle) -> None:
         self.shiftPage = shiftPage
         self.classXPath = classXPath
-        self.pageXPath = pageXPath
+        self.page = page
         self.handle = handle
 
 tabConfigs = []
 
 for i in range(tabsCount):
+    print("第{}个tab".format(i + 1))
     web.execute_script('window.open("http://jwts.hitwh.edu.cn/loginNOCAS");' if not vpn else 'window.open("http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS");')
     if i == 0:
         web.close()
     web.switch_to.window(web.window_handles[i])
     time.sleep(1)
-    targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n")
+    targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n[9]外专业课程\n")
     web.find_elements(By.CLASS_NAME, 'navi_title')[4].click()
     time.sleep(1)
 
@@ -86,9 +87,8 @@ for i in range(tabsCount):
     classNum = int(input('目标课序号\n'))
     page = int((classNum - classNum % 20) / 20 + 1)
     shiftPage = page != 1
-    pageXPath = '/html/body/div[7]/div/div[7]/ul/li[' + str(int(page + 2)) + ']'
     classXPath = '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[1]/div'
-    tabConfigs.append(TabConfig(shiftPage, classXPath, pageXPath, web.window_handles[i]))
+    tabConfigs.append(TabConfig(shiftPage, classXPath, page, web.window_handles[i]))
 
 print("自动抢课已开始，如需停止，请关闭窗口，或者杀死此进程")
 print("请在自行打开另一个窗口检查是否抢课成功")
@@ -104,7 +104,7 @@ while True:
             web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
             time.sleep(0.01)
             if each.shiftPage:
-                web.find_element(By.XPATH, each.pageXPath).click()
+                web.execute_script("jump({});".format(each.page))
             web.find_element(By.XPATH, each.classXPath).click()
             web.find_element(By.XPATH, each.classXPath).click()
             web.find_element(By.XPATH, each.classXPath).click()

@@ -58,12 +58,10 @@ else:
 
 tabsCount = int(input('请在终端上输入tab数\n'))
 
-class TabConfig:
+class TabCode:
 
-    def __init__(self, shiftPage, classXPath, page, handle) -> None:
-        self.shiftPage = shiftPage
-        self.classXPath = classXPath
-        self.page = page
+    def __init__(self, code: str, handle: str) -> None:
+        self.code = code
         self.handle = handle
 
 tabConfigs = []
@@ -78,17 +76,17 @@ for i in range(tabsCount):
     targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n[9]外专业课程\n")
     web.find_elements(By.CLASS_NAME, 'navi_title')[4].click()
     time.sleep(1)
-
     web.find_element(By.XPATH, '//*[@id="tabs_container"]/div/span[5]/p[' + targetClassType + ']').click()
     time.sleep(1)
     web.switch_to.frame(0)
     web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
     time.sleep(1)
-    classNum = int(input('目标课序号\n'))
+    classNum = int(input('目标课编号\n'))
     page = int((classNum - classNum % 20) / 20 + 1)
-    shiftPage = page != 1
-    classXPath = '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[1]/div'
-    tabConfigs.append(TabConfig(shiftPage, classXPath, page, web.window_handles[i]))
+    web.execute_script('jump({})'.format(page))
+    codeInputEle = web.find_element(By.XPATH, '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[15]/input')
+    classCode = codeInputEle.get_attribute('id')
+    tabConfigs.append(TabCode(classCode, web.window_handles[i]))
 
 print("自动抢课已开始，如需停止，请关闭窗口，或者杀死此进程")
 print("请在自行打开另一个窗口检查是否抢课成功")
@@ -101,14 +99,9 @@ while True:
         for each in tabConfigs:
             web.switch_to.window(each.handle)
             web.switch_to.frame(0)
-            web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
-            time.sleep(0.01)
-            if each.shiftPage:
-                web.execute_script("jump({});".format(each.page))
-            web.find_element(By.XPATH, each.classXPath).click()
-            web.find_element(By.XPATH, each.classXPath).click()
-            web.find_element(By.XPATH, each.classXPath).click()
-    except:
+            web.execute_script('''saveXsxk('{}')'''.format(each.code))
+            web.switch_to.alert.accept()
+    except Exception as e:
         if not excepted:
             print("出错了，可能是网络问题，也可能是抢课成功了，或者是其他原因，但程序不会停止，继续抢课")
-            excepted = True
+        excepted = True

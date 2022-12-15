@@ -81,7 +81,7 @@ for i in range(tabsCount):
     web.switch_to.frame(0)
     web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
     time.sleep(1)
-    classNum = int(input('目标课编号\n'))
+    classNum = int(input('目标课序号\n'))
     page = int((classNum - classNum % 20) / 20 + 1)
     web.execute_script('jump({})'.format(page))
     codeInputEle = web.find_element(By.XPATH, '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[15]/input')
@@ -104,4 +104,4 @@ while True:
     except Exception as e:
         if not excepted:
             print("出错了，可能是网络问题，也可能是抢课成功了，或者是其他原因，但程序不会停止，继续抢课")
-        excepted = True
+            excepted = True

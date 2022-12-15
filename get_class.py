@@ -73,18 +73,20 @@ for i in range(tabsCount):
         web.close()
     web.switch_to.window(web.window_handles[i])
     time.sleep(1)
-    targetClassType = input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n[9]外专业课程\n")
+    targetClassType = int(input("输入数字编号：\n[2]英语\n[3]体育\n[4]文化素质核心\n[5]创新研修\n[6]创新实验\n[7]创新创业\n[8]未来技术学院课程\n[9]外专业课程\n"))
     web.find_elements(By.CLASS_NAME, 'navi_title')[4].click()
     time.sleep(1)
-    web.find_element(By.XPATH, '//*[@id="tabs_container"]/div/span[5]/p[' + targetClassType + ']').click()
+    web.find_element(By.XPATH, '//*[@id="tabs_container"]/div/span[5]/p[' + str(targetClassType) + ']').click()
     time.sleep(1)
     web.switch_to.frame(0)
     web.find_element(By.XPATH, '/html/body/div[7]/div/div[4]/form/ul/li[5]/div').click()
     time.sleep(1)
     classNum = int(input('目标课序号\n'))
     page = int((classNum - classNum % 20) / 20 + 1)
-    web.execute_script('jump({})'.format(page))
-    codeInputEle = web.find_element(By.XPATH, '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[15]/input')
+    if page != 1:
+        web.execute_script('jump({})'.format(page))
+    time.sleep(1)
+    codeInputEle = web.find_element(By.XPATH, '/html/body/div[7]/div/div[6]/table/tbody/tr[' + str(int(classNum % 20 + 1)) + ']/td[' + ( '14' if targetClassType in [5, 6, 7] else '15' ) + ']/input')
     classCode = codeInputEle.get_attribute('id')
     tabConfigs.append(TabCode(classCode, web.window_handles[i]))
 
@@ -94,14 +96,17 @@ print("请勿在自动打开的窗口中进行任何操作")
 print("本程序不保证抢课成功，如需保证，请同时自行手动抢课")
 
 excepted = False
+wait = len(tabConfigs) != 1
+
 while True:
     try:
-        for each in tabConfigs:
+        for index, each in enumerate(tabConfigs):
             web.switch_to.window(each.handle)
             web.switch_to.frame(0)
+            if(len(tabConfigs) != 1):
+                web.execute_script("queryLike();")
             web.execute_script('''saveXsxk('{}')'''.format(each.code))
+            time.sleep(0.1)
             web.switch_to.alert.accept()
-    except Exception as e:
-        if not excepted:
-            print("出错了，可能是网络问题，也可能是抢课成功了，或者是其他原因，但程序不会停止，继续抢课")
-            excepted = True
+    except:
+        pass
